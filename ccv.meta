@@ -1,0 +1,18 @@
+;;;  -*- Hen -*-
+
+((egg "ccv.egg")
+ (category math)
+ (author "Andrei Barbu")
+ (maintainer "Andrei Barbu")
+ (license "GPL")
+ (doc-from-wiki)
+ (synopsis "bindings for CCV, a computer vision library")
+ (depends
+  (setup-helper "1.5.2")
+  (define-structure "1.0")
+  (traversal "1.0"))
+ (test-depends test)
+ (files "ccv.meta" 
+        "ccv.release-info"
+        "ccv.scm" 
+        "ccv.setup"))

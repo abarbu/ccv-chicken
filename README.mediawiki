@@ -1,0 +1,119 @@
+= CCV =
+
+Chicken scheme egg with bindings for
+[https://github.com/liuliu/ccv.git/ ccv], a computer vision library.
+
+Note that you will need to fetch the git submodules in this
+package. In addition this egg compiles ccv with options that require
+libjpeg, libpng, gsl, fftw3, and cblas. ccv takes a very long time to
+compile.
+
+=== API ===
+
+:(read-image image-filename)
+:(read-greyscale-image image-filename)
+:(write-image image filename)
+
+Read and write images, return #f on failure. The former always
+produces a color image.
+
+:(imlib-image->ccv-image image)
+:(imlib-image->ccv-greyscale-image image)
+
+These provide imlib intergration, see the
+[http://wiki.call-cc.org/eggref/4/imlib2 imlib] egg for how to use it.
+Note that imlib always stores images in color so the latter call will
+always convert the image.
+
+==== DPM ====
+
+:(load-dpm-mixture-model filename)
+
+Load in a DPM model. Returns #f when the file does not exist, a ccv assertion failure
+happens if the file does not contain a model.
+
+:(make-dpm-detection x y w h confidence)
+:(dpm-detection-x detection)
+:(dpm-detection-y detection)
+:(dpm-detection-w  detection)
+:(dpm-detection-h detection)
+:(dpm-detection-confidence detection)
+
+Create and access DPM detections.
+
+:(dpm-detect-object color-image model #!key (threshold 0.6) (interval 8))
+
+Returns a list of detections, does not return part locations at the moment.
+
+==== SIFT ====
+
+:(make-sift x y octave level scale angle descriptor)
+:(sift-x descriptor)
+:(sift-y descriptor)
+:(sift-octave descriptor)
+:(sift-level descriptor)
+:(sift-scale descriptor)
+:(sift-angle descriptor)
+:(sift-descriptor descriptor)
+
+Create and access SIFT descriptors detections. A descriptor is a
+vector of inexacts.
+
+:(sift greyscale-image #!key (noctaves 3) (nlevels 6) (up2x 1)
+     (edge-threshold 10) (norm-threshold 0) (peak-threshold 0))
+
+Run sift on an image and return a list of descriptors.
+
+:(sift-match image-sift object-sift #!key (threshold 0.36))
+
+A Scheme version of ccv's siftmatch. Given the sift descriptors for an
+image it attempts to find correspondences to an object's sift descriptors.
+
+==== SWT ====
+
+: (make-swt-detection x y width height)
+: (swt-detection-x detection)
+: (swt-detection-y detection)
+: (swt-detection-width detection)
+: (swt-detection-height detection)
+
+Create and access SWT detections.
+
+:(swt-detect-words greyscale-image)
+
+Detect text in images, returns a list of swt-detections.
+
+==== Caching ===
+
+:(ccv-enable-default-cache)
+:(ccv-disable-cache)
+:(ccv-drain-cache)
+
+CCV maintains an internal cache to speed up computations. These
+functions allow you to manage it.
+
+===== Example ======
+
+  (let img (image-load "/tmp/a.jpg"))
+  (for-each (lambda (swt)
+      (image-draw-rectangle img 
+                            (color/rgba 255 0 0 255)
+                             (swt-detection-x swt) (swt-detection-y swt)
+                             (swt-detection-width swt) (swt-detection-height swt)))
+   (swt-detect-words (read-greyscale-image "/tmp/a.jpg")))
+  (image-save img "/tmp/b.png")
+
+=== License ===
+
+   Copyright 2012 Andrei Barbu. All rights reserved.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+__NOTOC__
