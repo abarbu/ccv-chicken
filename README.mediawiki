@@ -59,8 +59,7 @@ Returns a list of detections, does not return part locations at the moment.
 Create and access SIFT descriptors detections. A descriptor is a
 vector of inexacts.
 
-:(sift greyscale-image #!key (noctaves 3) (nlevels 6) (up2x 1)
-     (edge-threshold 10) (norm-threshold 0) (peak-threshold 0))
+:(sift greyscale-image #!key (noctaves 3) (nlevels 6) (up2x 1) (edge-threshold 10) (norm-threshold 0) (peak-threshold 0))
 
 Run sift on an image and return a list of descriptors.
 
@@ -71,11 +70,11 @@ image it attempts to find correspondences to an object's sift descriptors.
 
 ==== SWT ====
 
-: (make-swt-detection x y width height)
-: (swt-detection-x detection)
-: (swt-detection-y detection)
-: (swt-detection-width detection)
-: (swt-detection-height detection)
+:(make-swt-detection x y width height)
+:(swt-detection-x detection)
+:(swt-detection-y detection)
+:(swt-detection-width detection)
+:(swt-detection-height detection)
 
 Create and access SWT detections.
 
@@ -83,7 +82,7 @@ Create and access SWT detections.
 
 Detect text in images, returns a list of swt-detections.
 
-==== Caching ===
+==== Caching ====
 
 :(ccv-enable-default-cache)
 :(ccv-disable-cache)
