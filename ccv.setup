@@ -8,9 +8,10 @@
 
 (setup-shared-extension-module 'ccv (extension-version "1.0")
   #:inline? #t #:types? #t
-  #:compile-options '(-O4 -keep-shadowed-macros -d2
+  #:compile-options `(-O4 -keep-shadowed-macros -d2
                           -D HAVE_SSE2 -D HAVE_LIBJPEG -D HAVE_LIBPNG
                           -D HAVE_GSL -D HAVE_FFTW3 -D HAVE_CBLAS
-                          -lm -ljpeg -lpng -lz -lgsl -lfftw3f -lfftw3 -lblas
+                          -lm -ljpeg -lpng -lz -lgsl -lfftw3f -lfftw3
+                          ,(with-input-from-pipe "pkg-config blas --libs" read-line)
                           -C -std=c99
                           ccv/lib/libccv.a))

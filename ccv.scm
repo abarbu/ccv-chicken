@@ -58,7 +58,7 @@
                     "ccv_dense_matrix_t *image = 0;
                       ccv_read(data, &image, CCV_IO_RGB_COLOR | CCV_IO_BGRA_RAW, height, width, 4*width);
                       C_return(image);")
-   (image-get-data-from-reading-only img)
+   (image-get-data-for-reading-only img)
    (image-width img)
    (image-height img))
   ccv-matrix-free))
@@ -70,7 +70,7 @@
                     "ccv_dense_matrix_t *image = 0;
                       ccv_read(data, &image, CCV_IO_GRAY | CCV_IO_BGRA_RAW, height, width, 4*width);
                       C_return(image);")
-   (image-get-data-from-reading-only img)
+   (image-get-data-for-reading-only img)
    (image-width img)
    (image-height img))
   ccv-matrix-free))
