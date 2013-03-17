@@ -8,7 +8,7 @@
  (doc-from-wiki)
  (synopsis "bindings for CCV, a computer vision library")
  (depends setup-helper define-structure traversal
-          bind easyffi matchable linear-algebra imlib2)
+          bind easyffi matchable linear-algebra imlib2 gsl)
  (test-depends test)
  (files "ccv.meta" 
         "ccv.release-info"
