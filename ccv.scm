@@ -23,119 +23,6 @@
 
 #>
 #include "ccv/lib/ccv.h"
-
-#include <gsl/gsl_vector_double.h>
-#include <gsl/gsl_blas.h>
-
-int gsl_vector_add3 (gsl_vector * a, const gsl_vector * b, gsl_vector * c)
-{
-  const size_t N = a->size;
-
-  if (b->size != N && c->size != N)
-      GSL_ERROR ("vectors must have same length", GSL_EBADLEN);
-  else 
-    {
-      const size_t stride_a = a->stride;
-      const size_t stride_b = b->stride;
-      const size_t stride_c = c->stride;
-
-      size_t i;
-
-      for (i = 0; i < N;
-             i++)
-        {
-         0;
-         ;; a->data[i * stride_a] = b->data[i * stride_b] + c->data[i * stride_c];
-        }
-      
-      return GSL_SUCCESS;
-    }
-}
-
-int gsl_vector_sub3 (gsl_vector * a, const gsl_vector * b, gsl_vector * c)
-{
-  const size_t N = a->size;
-
-  if (b->size != N && c->size != N)
-      GSL_ERROR ("vectors must have same length", GSL_EBADLEN);
-  else 
-    {
-      const size_t stride_a = a->stride;
-      const size_t stride_b = b->stride;
-      const size_t stride_c = c->stride;
-
-      size_t i;
-
-      for (i = 0; i < N;
-             i++)
-        {
-         a->data[i * stride_a] = b->data[i * stride_b] - c->data[i * stride_c];
-        }
-      
-      return GSL_SUCCESS;
-    }
-}
-
-double gsl_vector_dot_sub (gsl_vector * a, const gsl_vector * b)
-{
-  const size_t N = a->size; double r = 0;
-        
-  if (b->size != N)
-      GSL_ERROR ("vectors must have same length", GSL_EBADLEN);
-  else
-    {
-      const size_t stride_a = a->stride;
-      const size_t stride_b = b->stride;
-
-      size_t i;
-
-      for (i = 0; i < N;
-             i++)
-        {
-         double y = (a->data[i * stride_a] - b->data[i * stride_b]);
-         r += y*y;
-        }
-      
-      return r;
-    }
-}
-
-double gsl_vector_dot_axpy (double x, gsl_vector * a, const gsl_vector * b)
-{
-  const size_t N = a->size; double r = 0;
-        
-  if (b->size != N)
-      GSL_ERROR ("vectors must have same length", GSL_EBADLEN);
-  else
-    {
-      const size_t stride_a = a->stride;
-      const size_t stride_b = b->stride;
-
-      size_t i;
-
-      for (i = 0; i < N;
-             i++)
-        {
-         double y = (x*a->data[i * stride_a] + b->data[i * stride_b]);
-         r += y*y;
-        }
-      
-      return r;
-    }
-}
-
-double gsl_blas1_dnrm2(gsl_vector *v) {
-   double r;
-   const size_t N = v->size;
-   const size_t stride_v = v->stride;
-   int i;
-   for (i = 0; i < N;
-          i++)
-   {
-    double x = v->data[i * stride_v];
-    r += x*x;
-    }
-}
 <#
 
 (define ccv-enable-default-cache (foreign-lambda void "ccv_enable_default_cache"))
@@ -343,26 +230,14 @@ double gsl_blas1_dnrm2(gsl_vector *v) {
        ((foreign-lambda* int (((c-pointer "ccv_keypoint_t") p)) "C_return(p->level);") keypoint)
        ((foreign-lambda* double (((c-pointer "ccv_keypoint_t") p)) "C_return(p->regular.scale);") keypoint)
        ((foreign-lambda* double (((c-pointer "ccv_keypoint_t") p)) "C_return(p->regular.angle);") keypoint)
-       ;; (let ((v (make-f32vector 128)))
-       ;;  (foreign-lambda* void (((c-pointer "float") d) (f32vector a))
-       ;;                   "memcpy(a,d,sizeof(float)*128);")
-       ;;  v)
-       (map-n-vector (lambda (i) ((foreign-lambda* float ((integer i) ((c-pointer "float") d))
+       (->gsl
+        (map-n-vector (lambda (i) ((foreign-lambda* float ((integer i) ((c-pointer "float") d))
                                                "C_return(d[i]);") i d))
-         128)
-       ;; (->gsl
-       ;;  (map-n-vector (lambda (i) ((foreign-lambda* float ((integer i) ((c-pointer "float") d))
-       ;;                                         "C_return(d[i]);") i d))
-       ;;   128))
-       )))
+         128)))))
    (ccv-array-t-rnum keypoints))))
 
-(define-foreign-type gsl:vector (c-pointer "gsl_vector")
- gsl:vector-handle make-gsl:vector)
-
-
 (define (sift-match image-sift object-sift #!key (threshold 0.36))
- (let ((c 0) (scratch (make-gsl-vector 128)) (r '()))
+ (let ((r '()))
   (for-each (lambda (object-keypoint)
              (let* ((o (sift-descriptor object-keypoint))
                     (vl (vector-length o)))
@@ -374,44 +249,13 @@ double gsl_blas1_dnrm2(gsl_vector *v) {
                        (values min1 min-keypoint min2)
                        (let* 
                          ((k (sift-descriptor (car keypoints)))
-                          (d
-                           ;; (let ((n (v-! o k)))
-                           ;;  ((foreign-lambda double "gsl_blas_dnrm2" gsl:vector) n))
-                           ;; ((foreign-lambda double "gsl_blas1_dnrm2" gsl:vector) o)
-                           ;; ((foreign-lambda* double
-                           ;;                   ((gsl:vector x) (gsl:vector y))
-                           ;;                   "double d0;"
-                           ;;                   "gsl_blas_ddot(x,y,&d0);"
-                           ;;                   "C_return(d0);") o o)
-                           ;; ((foreign-lambda double "gsl_vector_dot_axpy" double gsl:vector gsl:vector) -1 k o)
-                           ;; ((foreign-lambda double "gsl_vector_dot_sub" gsl:vector gsl:vector) o k)
-                           ;; ((foreign-lambda int "gsl_vector_sub3" gsl:vector gsl:vector gsl:vector)
-                           ;;  scratch o k)
-                           ;; (gsl-dot o k)
-                           ;; (begin
-                           ;;  ((foreign-lambda void "gsl_vector_sub3" gsl:vector gsl:vector gsl:vector)
-                           ;;   scratch o k)
-                           ;;  (gsl-dot scratch scratch))
-                           (let ((n (v- o k)))
-                            (gsl-dot n n))
-                           ;; (let ((n (v- o k)))
-                           ;;  (dot n n))
-                           ;; (let loop ((i 0) (d 0.0))
-                           ;;  (if (fx= i vl)
-                           ;;      d
-                           ;;      (loop (fx+ i 1)
-                           ;;            (fp+ d
-                           ;;                 (let ((a (fp- (vector-ref o i) (vector-ref k i))))
-                           ;;                  (fp* a a))))))
-                           ))
-                        (set! c (AD#+-two 1 c))
+                          (d (let ((n (v- o k))) (dot n n))))
                         (cond ((< d min1) (loop d (car keypoints) min1 (cdr keypoints)))
                               ((< d min2) (loop min1 min-keypoint d (cdr keypoints)))
                               (else (loop min1 min-keypoint min2 (cdr keypoints)))))))))
                (when (< min1 (* min2 threshold))
                 (set! r (cons (list object-keypoint min-keypoint) r))))))
    object-sift)
-  (display c)(newline)
   r))
 
 (define-structure swt-detection x y w h)
